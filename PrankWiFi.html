@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+</head>
+<body>
+
+<h1>Camera Capture</h1>
+
+<button id="captureButton">Capture Photo</button>
+<img id="capturedImage" alt="Captured Photo">
+
+<script>
+    const captureButton = document.getElementById('captureButton');
+    const capturedImage = document.getElementById('capturedImage');
+
+    captureButton.addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.createElement('video');
+            document.body.appendChild(video);
+            video.srcObject = stream;
+            await video.play();
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageUrl = canvas.toDataURL('image/png');
+            capturedImage.src = imageUrl;
+
+            // Create a downloadable link for the captured image
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imageUrl;
+            downloadLink.download = 'captured_image.png';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            // Clean up: stop the video stream and remove the video element.
+            stream.getVideoTracks()[0].stop();
+            document.body.removeChild(video);
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+        }
+    });
+</script>
+
+</body>
+</html>
